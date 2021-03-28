@@ -49,7 +49,7 @@ class Post < ApplicationRecord
 
   def normalized_impressions_score(histogram_bins: Post.impressions_histogram[0])
     return 0 if histogram_bins.blank?
-    Post.get_bin_position(value: self.impressions, bins: histogram_bins).to_f / histogram_bins.size.to_f
+    (histogram_bins.size - Post.get_bin_position(value: self.impressions, bins: histogram_bins)).to_f / histogram_bins.size.to_f
   end
 
   def normalized_upvotes_score(histogram_bins: Post.upvotes_histogram[0])
