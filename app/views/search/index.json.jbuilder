@@ -7,6 +7,8 @@ json.posts @posts do |post|
   json.impressions post.impressions
   json.upvotes post.upvotes
   json.reposts post.reposts
+  json.creator_score post.creator_score
+  json.reach_score post.reach_score
   json.body post.body
   json.hashtags post.hashtags
 end

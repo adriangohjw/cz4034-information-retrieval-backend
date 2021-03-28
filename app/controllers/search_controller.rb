@@ -1,8 +1,7 @@
 class SearchController < ApplicationController
 
   def index
-    # to be replaced
-    @posts = Post.first(5)
+    @posts = Post.get_search_results(search_term: params[:search_term])
   end
 
 end

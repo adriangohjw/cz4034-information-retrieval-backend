@@ -2,6 +2,8 @@ class Post < ApplicationRecord
 
   searchkick
 
+  SEARCH_RESULT_SIZE = 50
+
   def search_data
     {
       body: preprocessed_body,
@@ -10,6 +12,28 @@ class Post < ApplicationRecord
       reach_score: reach_score,
       posted_at: posted_at
     }
+  end
+
+  def self.get_search_results(search_term:)
+    return Post.order(posted_at: :desc).first(SEARCH_RESULT_SIZE) if search_term.blank?
+
+    query = { 
+      query: {
+        function_score: {
+          query: {
+            bool: {
+              must: SearchHelper.concat_hash_into_array(
+                SearchHelper.querystring_to_hash(querystring: search_term)
+              ),
+              filter: [],
+              should: [],
+              must_not: []
+            }
+          }
+        }
+      }
+    }
+    return self.search(body: query, per_page: SEARCH_RESULT_SIZE)
   end
 
   def preprocessed_body
