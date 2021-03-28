@@ -23,7 +23,7 @@ class Post < ApplicationRecord
 
   # score post's impact and reach based on impressions, upvotes, reposts
   def calculate_reach_score
-    normalized_impressions_score * normalized_upvotes_score
+    normalized_impressions_score * normalized_upvotes_score * normalized_reposts_score
   end
 
   def normalized_followers_score(histogram_bins: Post.followers_histogram[0])
@@ -57,6 +57,11 @@ class Post < ApplicationRecord
     Post.get_bin_position(value: self.upvotes, bins: histogram_bins).to_f / histogram_bins.size.to_f
   end
 
+  def normalized_reposts_score(histogram_bins: Post.reposts_array[0])
+    return 0 if histogram_bins.blank?
+    Post.get_bin_position(value: self.reposts, bins: histogram_bins).to_f / histogram_bins.size.to_f
+  end
+
   def self.followers_histogram(followers_array: Post.all.pluck(:followers), histogram_size: 100)
     followers_array.reject! { |x| x.nil? }
     (bins, freqs) = followers_array.histogram(histogram_size)
@@ -75,6 +80,11 @@ class Post < ApplicationRecord
   def self.upvotes_histogram(upvotes_array: Post.all.pluck(:upvotes), histogram_size: 100)
     upvotes_array.reject! { |x| x.nil? }
     (bins, freqs) = upvotes_array.histogram(histogram_size)
+  end
+
+  def self.reposts_array(reposts_array: Post.all.pluck(:reposts), histogram_size: 100)
+    reposts_array.reject! { |x| x.nil? }
+    (bins, freqs) = reposts_array.histogram(histogram_size)
   end
 
   private
