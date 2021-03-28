@@ -21,7 +21,7 @@ class Post < ApplicationRecord
     following_histogram = Post.following_histogram[0]
     impressions_histogram = Post.impressions_histogram[0]
     upvotes_histogram = Post.upvotes_histogram[0]
-    reposts_histogram = Post.reposts_array[0]
+    reposts_histogram = Post.reposts_histogram[0]
 
     Post.all.each do |post|
       creator_score = post.calculate_creator_score(followers_histogram: followers_histogram,
@@ -82,7 +82,7 @@ class Post < ApplicationRecord
     Post.get_bin_position(value: self.upvotes, bins: histogram_bins).to_f / histogram_bins.size.to_f
   end
 
-  def normalized_reposts_score(histogram_bins: Post.reposts_array[0])
+  def normalized_reposts_score(histogram_bins: Post.reposts_histogram[0])
     return 0 if histogram_bins.blank?
     Post.get_bin_position(value: self.reposts, bins: histogram_bins).to_f / histogram_bins.size.to_f
   end
@@ -107,7 +107,7 @@ class Post < ApplicationRecord
     (bins, freqs) = upvotes_array.histogram(histogram_size)
   end
 
-  def self.reposts_array(reposts_array: Post.all.pluck(:reposts), histogram_size: 100)
+  def self.reposts_histogram(reposts_array: Post.all.pluck(:reposts), histogram_size: 100)
     reposts_array.reject! { |x| x.nil? }
     (bins, freqs) = reposts_array.histogram(histogram_size)
   end
