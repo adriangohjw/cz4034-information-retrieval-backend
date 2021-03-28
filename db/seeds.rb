@@ -8,6 +8,6 @@
 
 require 'factory_bot_rails'
 
-100.times do
+1000.times do
   FactoryBot.create(:post)
 end
