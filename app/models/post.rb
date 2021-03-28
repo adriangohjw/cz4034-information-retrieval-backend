@@ -88,28 +88,23 @@ class Post < ApplicationRecord
   end
 
   def self.followers_histogram(followers_array: Post.all.pluck(:followers), histogram_size: 100)
-    followers_array.reject! { |x| x.nil? }
-    (bins, freqs) = followers_array.histogram(histogram_size)
+    Post.get_histogram(array: followers_array, size: histogram_size)
   end
 
   def self.following_histogram(following_array: Post.all.pluck(:following), histogram_size: 100)
-    following_array.reject! { |x| x.nil? }
-    (bins, freqs) = following_array.histogram(histogram_size)
+    Post.get_histogram(array: following_array, size: histogram_size)
   end
 
   def self.impressions_histogram(impressions_array: Post.all.pluck(:impressions), histogram_size: 100)
-    impressions_array.reject! { |x| x.nil? }
-    (bins, freqs) = impressions_array.histogram(histogram_size)
+    Post.get_histogram(array: impressions_array, size: histogram_size)
   end
 
   def self.upvotes_histogram(upvotes_array: Post.all.pluck(:upvotes), histogram_size: 100)
-    upvotes_array.reject! { |x| x.nil? }
-    (bins, freqs) = upvotes_array.histogram(histogram_size)
+    Post.get_histogram(array: upvotes_array, size: histogram_size)
   end
 
   def self.reposts_histogram(reposts_array: Post.all.pluck(:reposts), histogram_size: 100)
-    reposts_array.reject! { |x| x.nil? }
-    (bins, freqs) = reposts_array.histogram(histogram_size)
+    Post.get_histogram(array: reposts_array, size: histogram_size)
   end
 
   private
@@ -117,6 +112,11 @@ class Post < ApplicationRecord
   def self.remove_words_from_text(text:, words:) 
     words&.each { |word| text.slice!(word) }
     return text;
+  end
+
+  def self.get_histogram(array:, size:)
+    array.reject! { |x| x.nil? }
+    (bins, freqs) = array.histogram(size)
   end
 
   def self.get_bin_position(value:, bins:)
