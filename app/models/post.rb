@@ -6,14 +6,32 @@ class Post < ApplicationRecord
     {
       body: preprocessed_body,
       hashtags: hashtags,
-      creator_score: calculate_creator_score,
-      reach_score: calculate_reach_score,
+      creator_score: creator_score,
+      reach_score: reach_score,
       posted_at: posted_at
     }
   end
 
   def preprocessed_body
     Post.remove_words_from_text(text: body, words: hashtags)
+  end
+
+  def self.update_all_scores
+    followers_histogram = Post.followers_histogram[0]
+    following_histogram = Post.following_histogram[0]
+    impressions_histogram = Post.impressions_histogram[0]
+    upvotes_histogram = Post.upvotes_histogram[0]
+    reposts_histogram = Post.reposts_array[0]
+
+    Post.all.each do |post|
+      creator_score = post.calculate_creator_score(followers_histogram: followers_histogram,
+                                                   following_histogram: following_histogram)
+      reach_score = post.calculate_reach_score(impressions_histogram: impressions_histogram,
+                                               upvotes_histogram: upvotes_histogram,
+                                               reposts_histogram: reposts_histogram)
+      post.update(creator_score: creator_score,
+                  reach_score: reach_score)
+    end
   end
 
   # score creator based on verified status, followers, following etc.

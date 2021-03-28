@@ -11,3 +11,6 @@ require 'factory_bot_rails'
 1000.times do
   FactoryBot.create(:post)
 end
+
+require 'histogram/array'
+Post.update_all_scores
