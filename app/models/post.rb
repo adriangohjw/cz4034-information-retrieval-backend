@@ -8,8 +8,7 @@ class Post < ApplicationRecord
     {
       body: preprocessed_body,
       hashtags: hashtags,
-      creator_score: creator_score,
-      reach_score: reach_score,
+      score: creator_score * reach_score,
       posted_at: posted_at
     }
   end
@@ -31,7 +30,10 @@ class Post < ApplicationRecord
             }
           }
         }
-      }
+      },
+      sort: [
+        { score: "desc" }
+      ]
     }
     return self.search(body: query, per_page: SEARCH_RESULT_SIZE)
   end
