@@ -17,13 +17,20 @@ class Post < ApplicationRecord
   end
 
   # score creator based on verified status, followers, following etc.
-  def calculate_creator_score
-    normalized_followers_score * normalized_verified_score * normalized_following_score
+  def calculate_creator_score(followers_histogram: Post.followers_histogram[0], 
+                              following_histogram: Post.following_histogram[0])
+    normalized_followers_score(histogram_bins: followers_histogram) * 
+    normalized_following_score(histogram_bins: following_histogram) *
+    normalized_verified_score
   end
 
   # score post's impact and reach based on impressions, upvotes, reposts
-  def calculate_reach_score
-    normalized_impressions_score * normalized_upvotes_score * normalized_reposts_score
+  def calculate_reach_score(impressions_histogram: Post.impressions_histogram[0],
+                            upvotes_histogram: Post.upvotes_histogram[0],
+                            reposts_histogram: Post.reposts_array[0])
+    normalized_impressions_score(histogram_bins: impressions_histogram) * 
+    normalized_upvotes_score(histogram_bins: upvotes_histogram) * 
+    normalized_reposts_score(histogram_bins: reposts_histogram)
   end
 
   def normalized_followers_score(histogram_bins: Post.followers_histogram[0])
