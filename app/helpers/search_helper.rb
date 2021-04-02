@@ -1,5 +1,11 @@
 module SearchHelper
 
+  def self.empty_params(search_term:, hashtags:)
+    return false unless search_term.blank?
+    return false unless hashtags.count == 0
+    return true
+  end
+
   def self.concat_hash_into_array(*hashes)
     array_result = Array.new
 
@@ -27,26 +33,32 @@ module SearchHelper
     end
   end
 
-  def self.array_param_to_hash(param_name:, array_param:)
-    return Array.new if array_param.blank?
+  class ArrayParam
+    attr_reader :value
 
-    hash_result = { 
-      bool: {
-        should: [],
-      }
-    }
-
-    array_param.each do |item|
-      hash_result[:bool][:should].append(
-        {
-          match_phrase: {
-            "#{param_name}": item
-          }
-        }
-     )
+    def initialize(param_name, array_param)
+      @param_name = param_name
+      @array_param = array_param
+      @value = parsed_array_param
     end
 
-    return hash_result
+    def parsed_array_param
+      results = Array.new
+      @array_param.each do |param| 
+        results << { 
+          bool: {
+            should: [
+              {
+                match_phrase: {
+                  "#{@param_name}": param
+                }
+              }
+            ]
+          }
+        }
+      end
+      return results
+    end
   end
-  
+
 end
