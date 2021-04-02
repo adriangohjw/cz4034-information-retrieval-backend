@@ -31,12 +31,15 @@ class Post < ApplicationRecord
               should: [],
               must_not: []
             }
+          },
+          field_value_factor: {
+            field: "score",
+            factor: 1.2,
+            modifier: "square",
+            missing: 1
           }
         }
-      },
-      sort: [
-        { score: "desc" }
-      ]
+      }
     }
     return self.search(body: query, per_page: SEARCH_RESULT_SIZE)
   end
