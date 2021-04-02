@@ -25,7 +25,7 @@ class Post < ApplicationRecord
           query: {
             bool: {
               must: SearchHelper.concat_hash_into_array(
-                SearchHelper.querystring_to_hash(querystring: search_term)
+                SearchHelper.querystring_to_hash(search_term)
               ) + SearchHelper::ArrayParam.new('hashtags', hashtags).value,
               filter: [],
               should: [],

@@ -16,21 +16,13 @@ module SearchHelper
     return array_result
   end
 
-  def self.querystring_to_hash(param_name: nil, querystring:)
+  def self.querystring_to_hash(querystring)
     return nil if querystring.blank?
-    if param_name.blank?
-      return {
-        query_string: {
-          query: "#{querystring}"
-        }
+    return {
+      query_string: {
+        query: "#{querystring}"
       }
-    else
-      return {
-        query_string: {
-          query: "#{param_name}: (#{querystring})"
-        }
-      }
-    end
+    }
   end
 
   class ArrayParam
