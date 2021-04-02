@@ -13,7 +13,7 @@ class Post < ApplicationRecord
     }
   end
 
-  def self.get_search_results(search_term:)
+  def self.get_search_results(search_term:, hashtags: Array.new)
     return Post.order(posted_at: :desc).first(SEARCH_RESULT_SIZE) if search_term.blank?
 
     query = { 
@@ -22,7 +22,8 @@ class Post < ApplicationRecord
           query: {
             bool: {
               must: SearchHelper.concat_hash_into_array(
-                SearchHelper.querystring_to_hash(querystring: search_term)
+                SearchHelper.querystring_to_hash(querystring: search_term),
+                SearchHelper.array_param_to_hash(param_name: 'hashtags', array_param: hashtags)
               ),
               filter: [],
               should: [],

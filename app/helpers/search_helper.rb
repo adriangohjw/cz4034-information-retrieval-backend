@@ -27,4 +27,26 @@ module SearchHelper
     end
   end
 
+  def self.array_param_to_hash(param_name:, array_param:)
+    return Array.new if array_param.blank?
+
+    hash_result = { 
+      bool: {
+        should: [],
+      }
+    }
+
+    array_param.each do |item|
+      hash_result[:bool][:should].append(
+        {
+          match_phrase: {
+            "#{param_name}": item
+          }
+        }
+     )
+    end
+
+    return hash_result
+  end
+  
 end
