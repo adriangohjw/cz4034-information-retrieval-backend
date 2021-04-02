@@ -31,3 +31,6 @@ Things you may want to cover:
 
 * How to run the server
   1) Run `rails s`
+
+* API endpoints
+  - `/search?search_term=randomstuff&hashtags[]=hashtag1&hashtags[]=hashtag2`
