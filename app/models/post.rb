@@ -8,7 +8,7 @@ class Post < ApplicationRecord
     {
       body: preprocessed_body,
       hashtags: hashtags,
-      score: creator_score * reach_score,
+      score: creator_score.to_f * reach_score.to_f,
       posted_at: posted_at
     }
   end
