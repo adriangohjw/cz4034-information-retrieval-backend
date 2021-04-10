@@ -19,14 +19,28 @@ const port = 3000
 
 // /search?search_term=randomstuff&hashtags[]=hashtag1&hashtags[]=hashtag2
 
+// const field_value_skew = 
 
+const functions_list = [
+  {"script_score": {
+    "script": {
+      "params" : {
+        "division" : 100,
+        "upvote_skew": 3,
+        "impressions_skew": 2,
+        "followers_skew": 1
+      },
+      "source": "( " +
+        " params.upvote_skew * Math.log(1 + doc['upvotes'].value) + " +
+        " params.impressions_skew * Math.log(1 + doc['impressions'].value) + " + 
+        " params.followers_skew * Math.log(1 + doc['followers'].value)" +
+        ") / params.division"
+    }
+  }}
+]
 
 
 function elasticSearch(search_term, hashtag = [], query_from = 0, query_size = 20){
-
-
-
-  
 
     var querySearch = {
         // bool: {
@@ -44,7 +58,8 @@ function elasticSearch(search_term, hashtag = [], query_from = 0, query_size = 2
                 "max_expansions": 50,
                 "prefix_length": 0,
                 "transpositions": true,
-                "rewrite": "constant_score"
+                "rewrite": "constant_score",
+                // "weight": 100
             }
         }
     };
@@ -56,7 +71,7 @@ function elasticSearch(search_term, hashtag = [], query_from = 0, query_size = 2
           must: {
             "terms": {
               "hashtags": hashtag,
-              "boost": 1
+              // "boost": 1.0
             }
           }
         }
@@ -71,12 +86,10 @@ function elasticSearch(search_term, hashtag = [], query_from = 0, query_size = 2
             query: {
               function_score:{
                 query: querySearch,
-                field_value_factor: {
-                  field: "impressions",
-                  factor: 1.2,
-                  modifier: "square",
-                  missing: 1
-                }
+                boost: 10,
+                functions: functions_list,
+                boost_mode: "sum",
+                score_mode: "sum"
               }
             }
         }
@@ -216,6 +229,9 @@ function elasticSuggest(search_term, hashtag = [], query_from = 0, query_size = 
 
   let search_term = req.query.search_term;
   let fieldname = req.query.field;
+  let from = req.query.from;  
+  let size = req.query.size;  
+
 
   if(typeof search_term != 'string'){
     res.end("Invalid");
@@ -229,7 +245,7 @@ function elasticSuggest(search_term, hashtag = [], query_from = 0, query_size = 
   }
   // console.log(
     
-    elasticDistribution(search_term, hashtags, fieldname)
+    elasticDistribution(search_term, hashtags, fieldname, from, size)
     .then((result, err) => {
         if (err){ 
           console.log(err)
@@ -247,7 +263,7 @@ function elasticSuggest(search_term, hashtag = [], query_from = 0, query_size = 
         })
 })
 
-function elasticDistribution(search_term, hashtag = [], fieldName = "upvotes"){
+function elasticDistribution(search_term, hashtag = [], fieldName = "upvotes", query_from = 0, query_size = 20){
 
   var querySearch = {
       "fuzzy": {
@@ -276,18 +292,43 @@ function elasticDistribution(search_term, hashtag = [], fieldName = "upvotes"){
     }
   }
 
+//   body: {
+//     from: query_from,
+//     size: query_size,
+//     query: {
+//       function_score:{
+//         query: querySearch,
+//         boost: 10,
+//         functions: functions_list,
+//         boost_mode: "sum",
+//         score_mode: "sum"
+//       }
+//     }
+// }
+
    return client.search({
       index: 'parler_posts',
       body: {
-          query:  querySearch,
+        from: query_from,
+        size: query_size,
+        query: {
+                function_score:{
+                  query: querySearch,
+                  boost: 10,
+                  functions: functions_list,
+                  boost_mode: "sum",
+                  score_mode: "sum"
+                }
+              },
+        // query:  querySearch,
           aggs: {
             result_percentile: {
               percentiles: {
                 field: fieldName,
-                 percents: [ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100 ],
-                 "hdr": {                                  
-                  "number_of_significant_value_digits": 5
-                }
+                 percents: [ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100 ]
+                //  ,"hdr": {                                  
+                  // "number_of_significant_value_digits": 5
+                // }
               }
             }
           }
