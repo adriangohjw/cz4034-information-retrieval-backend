@@ -29,7 +29,8 @@ const functions_list = [
         "upvote_skew": 3,
         "impressions_skew": 2,
         "followers_skew": 1
-      },
+      },//"source": "1"
+	
       "source": "( " +
         " params.upvote_skew * Math.log(1 + doc['upvotes'].value) + " +
         " params.impressions_skew * Math.log(1 + doc['impressions'].value) + " + 
@@ -118,6 +119,7 @@ app.get('/search', (req, res) => {
       res.end("Invalid");
       return;
     }
+	//console.log(search_term);
 
     let hashtags = req.query.hashtags;
     if(typeof hashtags == 'string'){
@@ -134,6 +136,7 @@ app.get('/search', (req, res) => {
           }else{
             res.end(JSON.stringify({posts:result.body.hits.hits}));
           }
+	  console.log(result.body.took)
           // console.log(err)
           // console.log(result)
         }).catch((err)=>
